@@ -42,7 +42,7 @@
         albums.push(albumPicasso);
       }
       return albums;
-    }
+    };
 
     return Fixtures;
   }
