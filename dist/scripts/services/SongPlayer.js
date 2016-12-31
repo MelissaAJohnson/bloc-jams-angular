@@ -1,12 +1,12 @@
 (function() {
-  function SongPlayer() {
+  function SongPlayer(Fixtures) {
     var SongPlayer = {};
 
     /**
-    * @desc Initially sets current song to none
+    * @desc Selected album information pulled from Fixtures data
     * @type {Object}
     */
-    var currentSong = null;
+    var currentAlbum = Fixtures.getAlbum();
 
     /**
     * @desc Buzz object audio file
@@ -22,7 +22,7 @@
     var setSong = function(song) {
       if (currentBuzzObject) {
         currentBuzzObject.stop();
-        currentSong.playing = null;
+        SongPlayer.currentSong.playing = null;
       }
 
       currentBuzzObject = new buzz.sound(song.audioUrl, {
@@ -30,7 +30,7 @@
         preload: true
       });
 
-      currentSong = song;
+      SongPlayer.currentSong = song;
     };
 
     /**
@@ -43,16 +43,27 @@
       song.playing = true;
     };
 
+    var getSongIndex = function(song) {
+      return currentAlbum.songs.indexOf(song);
+    };
+
+    /**
+    * @desc Initially sets current song to none
+    * @type {Object}
+    */
+    SongPlayer.currentSong = null;
+
     /**
     * @function SongPlayer.play
     * @desc Checks to see if the currently playing song equals the song paramater passed. If it is, the player pauses. If it isn't, it starts playing the new song.
     * @param {Object} song
     */
     SongPlayer.play = function(song) {
-      if (currentSong !== song) {
+      song = song || SongPlayer.currentSong;
+      if (SongPlayer.currentSong !== song) {
         setSong(song);
         playSong(song);
-      } else if (currentSong === song) {
+      } else if (SongPlayer.currentSong === song) {
         if (currentBuzzObject.isPaused()) {
           playSong(song);
         }
@@ -65,9 +76,29 @@
     * @param {Object} song
     */
     SongPlayer.pause = function(song) {
+      song = song || SongPlayer.currentSong;
       currentBuzzObject.pause();
       song.playing = false;
     };
+
+    /**
+    * @function SongPlayer.previous
+    * @desc Identifies the prior to current song by minusing 1 from current song index
+    */
+    SongPlayer.previous = function() {
+      var currentSongIndex = getSongIndex(SongPlayer.currentSong);
+      currentSongIndex--;
+
+      if (currentSongIndex < 0) {
+        currentBuzzObject.stop();
+        SongPlayer.currentSong.playing = null;
+      } else {
+        var song = currentAlbum.songs[currentSongIndex];
+        setSong(song);
+        playSong(song);
+      }
+    };
+
     return SongPlayer;
   }
 
